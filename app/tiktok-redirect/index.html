@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ViPost — chuyển về máy của bạn</title>
+  <style>body{font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;color:#334155}</style>
+</head>
+<body>
+  <p>Đang chuyển về ViPost trên máy của bạn…</p>
+  <script>
+    // TikTok bắt buộc địa chỉ redirect là https, không nhận localhost.
+    // Host trang này ở 1 địa chỉ https (vd GitHub Pages), khai báo địa chỉ đó trong TikTok Developer Portal
+    // và trong TIKTOK_REDIRECT_URI của file .env. Trang chỉ chuyển tiếp code/state về app local.
+    var TARGET = 'http://localhost:3000/api/auth/tiktok/callback';
+    window.location.replace(TARGET + window.location.search);
+  </script>
+</body>
+</html>

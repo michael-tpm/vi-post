@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Kênh đã kết nối (1 tài khoản TikTok hoặc 1 kênh YouTube)
+model Channel {
+  id               String    @id @default(cuid())
+  provider         String // tiktok | youtube | demo
+  externalId       String
+  name             String
+  username         String?
+  avatar           String?
+  accessToken      String // đã mã hoá AES-GCM
+  refreshToken     String? // đã mã hoá AES-GCM
+  expiresAt        DateTime?
+  refreshExpiresAt DateTime?
+  status           String    @default("ACTIVE") // ACTIVE | NEED_RECONNECT
+  statusMessage    String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  posts            Post[]
+
+  @@unique([provider, externalId])
+}
+
+model Media {
+  id           String   @id @default(cuid())
+  originalName String
+  path         String
+  mime         String
+  size         BigInt
+  duration     Float?
+  width        Int?
+  height       Int?
+  createdAt    DateTime @default(now())
+  posts        Post[]
+}
+
+// 1 lần soạn = 1 groupId, mỗi kênh 1 bản ghi Post (kênh này lỗi không ảnh hưởng kênh kia)
+model Post {
+  id          String    @id @default(cuid())
+  groupId     String
+  channelId   String
+  mediaId     String
+  caption     String // TikTok: nội dung; YouTube: mô tả
+  title       String? // YouTube: tiêu đề
+  settings    String    @default("{}")
+  publishAt   DateTime // UTC
+  state       String    @default("QUEUE") // QUEUE | PUBLISHING | PENDING | PUBLISHED | ERROR | CANCELLED
+  attempts    Int       @default(0)
+  lockedAt    DateTime?
+  nextCheckAt DateTime?
+  checkCount  Int       @default(0)
+  pendingData String? // trạng thái dở dang của nền tảng (publish_id, upload session...)
+  externalId  String?
+  externalUrl String?
+  error       String?
+  warning     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  media       Media     @relation(fields: [mediaId], references: [id])
+
+  @@index([state, publishAt])
+  @@index([state, nextCheckAt])
+  @@index([groupId])
+}
+
+model OAuthState {
+  id        String   @id // giá trị state gửi đi
+  provider  String
+  createdAt DateTime @default(now())
+}

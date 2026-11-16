@@ -1,0 +1,11 @@
+node_modules
+.next
+.env
+uploads
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
+next-env.d.ts
+*.tsbuildinfo
+.worker.lock
